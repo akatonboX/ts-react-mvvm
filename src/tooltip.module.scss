@@ -1,0 +1,81 @@
+.container{
+  text-align: initial;
+  vertical-align: initial;
+  display: inline-block;
+  .tooltip{
+    color: var(background-color);
+    background-color: lightyellow;
+    border-color:lightyellow;
+    opacity: 0.9;
+    margin-top: 0px;
+    margin-left: 0px;
+    visibility: visible;
+    border-radius: 3px;
+    display: inline-block;
+    font-size: 13px;
+    padding: 8px 21px;
+    position: absolute;
+    z-index: 999;
+  }
+  .tooltip.top::after{
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-top-color: inherit;
+    border-top-style: solid;
+    border-top-width: 6px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    bottom: -6px;
+    left: 50%;
+    margin-left: -8px;
+  }
+  .tooltip.bottom::after{
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-bottom-color: inherit;
+    border-bottom-style: solid;
+    border-bottom-width: 6px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    top: -6px;
+    left: 50%;
+    margin-left: -8px;
+  }
+
+  .tooltip.left::after{
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-left-color: inherit;
+    border-left-style: solid;
+    border-left-width: 6px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    right: -6px;
+    top: 50%;
+    margin-top: -8px;
+  }
+  .tooltip.right::after{
+    content: "";
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-right-color: inherit;
+    border-right-style: solid;
+    border-right-width: 6px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    left: -6px;
+    top: 50%;
+    margin-top: -8px;
+  }
+
+  .target{
+    display: inline-block;
+  }
+}
