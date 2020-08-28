@@ -1,15 +1,15 @@
-import { SourceKey } from "./binding-common";
-import { Path } from "./path";
-import { Event } from "./event";
-import { isArray } from "util";
-import { ValidateError, InputRef } from "./binding-input";
+import { isArray } from 'util';
+import { SourceKey } from './binding-common';
+import { Path } from './path';
+import { Event } from './event';
+import { ValidateError, InputRef } from './binding-input';
 
 export interface SourceChangedEventArgs{
   readonly sourceKey: SourceKey;
   readonly oldSource: any;
   readonly newSource: any;
 }
-  
+
 export interface ValueChangingEventArgs{
   readonly sourceKey: SourceKey;
   readonly path: Path;
@@ -38,21 +38,24 @@ export interface ErrorChangedEventArgs{
   readonly oldValue: ValidateError[];
   readonly newValue: ValidateError[];
 }
-class _EventManager{
+class EventManagerImple {
   readonly sourceChanged: Event<SourceChangedEventArgs> = new Event<SourceChangedEventArgs>();
+
   readonly valueChanged: Event<ValueChangedEventArgs> = new Event<ValueChangedEventArgs>();
+
   readonly inputChanged: Event<InputChangedEventArgs> = new Event<InputChangedEventArgs>();
+
   readonly ErrorChanged: Event<ErrorChangedEventArgs> = new Event<ErrorChangedEventArgs>();
 }
 
-export const EventManager = new _EventManager();
+export const EventManager = new EventManagerImple();
 
-export function createValueChangedEventArgs(sourceKey: SourceKey, path: Path, oldValue: any, newValue: any): ValueChangedEventArgs{
+export function createValueChangedEventArgs(sourceKey: SourceKey, path: Path, oldValue: any, newValue: any): ValueChangedEventArgs {
   const changes = getChanges(path, oldValue, newValue, []);
   return {
-    sourceKey: sourceKey,
+    sourceKey,
     originalPath: path,
-    changes: changes
+    changes,
   };
 }
 
@@ -62,21 +65,21 @@ type ValueChanged = {
   readonly newValue: any;
 };
 
-function getChanges(path: Path, oldValue: any, newValue: any, changedPaths: ValueChanged[]): ValueChanged[]{
-  if(oldValue === undefined && newValue === undefined){
+function getChanges(path: Path, oldValue: any, newValue: any, changedPaths: ValueChanged[]): ValueChanged[] {
+  if (oldValue === undefined && newValue === undefined) {
     return changedPaths;
   }
-  else if(isArray(oldValue) && isArray(newValue)){
+  else if (isArray(oldValue) && isArray(newValue)) {
     const result: ValueChanged[] = changedPaths;
     const length = oldValue.length > newValue.length ? oldValue.length : newValue.length;
-    for(var i = 0; i < length; i++){
+    for (let i = 0; i < length; i++) {
       const oldChildValue = i < oldValue.length ? oldValue[i] : undefined;
       const newChildValue = i < newValue.length ? newValue[i] : undefined;
       getChanges(path.$getChild(i), oldChildValue, newChildValue, changedPaths);
     }
-    if(oldValue.length != newValue.length){
+    if (oldValue.length !== newValue.length) {
       result.push({
-        path: path.$getChild("length"),
+        path: path.$getChild('length'),
         oldValue: oldValue.length,
         newValue: newValue.length,
       });
@@ -85,16 +88,16 @@ function getChanges(path: Path, oldValue: any, newValue: any, changedPaths: Valu
   }
   else{
     const result: ValueChanged[] = changedPaths;
-    if(oldValue !== newValue){
+    if (oldValue !== newValue) {
       result.push({
-        path: path,
-        oldValue: oldValue,
-        newValue: newValue,
+        path,
+        oldValue,
+        newValue,
       });
     }
-    if(isArray(oldValue)){
+    if (isArray(oldValue)) {
       result.push({
-        path: path.$getChild("length"),
+        path: path.$getChild('length'),
         oldValue: undefined,
         newValue: oldValue.length,
       });
@@ -104,11 +107,10 @@ function getChanges(path: Path, oldValue: any, newValue: any, changedPaths: Valu
           oldValue: item,
           newValue: undefined,
         });
-      })
-    }
-    else if(isArray(newValue)){
+      });
+    } else if (isArray(newValue)) {
       result.push({
-        path: path.$getChild("length"),
+        path: path.$getChild('length'),
         oldValue: undefined,
         newValue: newValue.length,
       });
@@ -118,7 +120,7 @@ function getChanges(path: Path, oldValue: any, newValue: any, changedPaths: Valu
           oldValue: undefined,
           newValue: item,
         });
-      })
+      });
     }
     return result;
   }

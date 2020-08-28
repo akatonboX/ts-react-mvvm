@@ -6,7 +6,9 @@ module.exports = {
   output: {
     filename: 'index.js',
     path: path.join(__dirname, 'lib'),
-    libraryTarget: 'commonjs2',
+    libraryTarget: 'umd',
+    library: '',
+    libraryExport: ''
   },
   module: {
     rules: [
@@ -48,20 +50,21 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
-  externals: [
-    {
-      react: {
-        root: 'React',
-        commonjs2: 'react',
-        commonjs: 'react',
-        amd: 'react'
-      },
-      'react-dom': {
-        root: 'ReactDom',
-        commonjs2: 'react-dom',
-        commonjs: 'react-dom',
-        amd: 'react-dom'
-      }
-    }
-  ]
+  externals: {
+    react: {
+      root: 'React',
+      commonjs2: 'react',
+      commonjs: 'react',
+      amd: 'react',
+      umd: 'react',
+    },
+    'react-dom': {
+      root: 'ReactDOM',
+      commonjs2: 'react-dom',
+      commonjs: 'react-dom',
+      amd: 'react-dom',
+      umd: 'react-dom',
+    },
+  },
+  
 }

@@ -1,4 +1,3 @@
-﻿
 export * from './binding-common';
 export * from './binding-components';
 export * from './binding-hooks';

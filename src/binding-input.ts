@@ -1,65 +1,75 @@
-import { BindingPath, InvalidType, SourceKey } from "./binding-common";
-import { SourceManager, ReadonlySourceProxy } from "./binding-source";
-import { EventManager } from "./binding-event";
+import { BindingPath, InvalidType, SourceKey } from './binding-common';
+import { SourceManager, ReadonlySourceProxy } from './binding-source';
+import { EventManager } from './binding-event';
 
-
-class _InputManager{
+class InputManagerImpl {
   private inputs: InputRef[] = [];
 
-  find(id: symbol): InputRef | undefined{
-    return this.inputs.find(item => item.id === id);
+  find(id: symbol): InputRef | undefined {
+    return this.inputs.find((item) => item.id === id);
   }
 
-  findByPath(bindingPath: BindingPath): InputRef[]{
-    return this.inputs.filter(inputRef => inputRef.bindingPath.$equals(bindingPath));
+  findByPath(bindingPath: BindingPath): InputRef[] {
+    return this.inputs.filter((inputRef) => inputRef.bindingPath.$equals(bindingPath));
   }
-  findBySourceKey(sourceKey: SourceKey): InputRef[]{
-    return this.inputs.filter(inputRef => inputRef.bindingPath.$sourceKey === sourceKey);
+
+  findBySourceKey(sourceKey: SourceKey): InputRef[] {
+    return this.inputs.filter((inputRef) => inputRef.bindingPath.$sourceKey === sourceKey);
   }
-  findByDependence(bindingPath: BindingPath): InputRef[]{
-    return this.inputs.filter(inputRef => inputRef.dependencePaths.find(path => path.$equals(bindingPath)) !== undefined);
+
+  findByDependence(bindingPath: BindingPath): InputRef[] {
+    return this.inputs.filter((inputRef) => inputRef.dependencePaths.find((path) => path.$equals(bindingPath)) !== undefined);
   }
-  findByName(name: string): InputRef[]{
-    return this.inputs.filter(inputRef => inputRef.name === name);
+
+  findByName(name: string): InputRef[] {
+    return this.inputs.filter((inputRef) => inputRef.name === name);
   }
-  regist(inputRef: InputRef){
-    if(this.find(inputRef.id) !== undefined)
-      throw Error(`_InputManager.regist: id already exists. id=${String(inputRef.id)}`);
+
+  regist(inputRef: InputRef) {
+    if (this.find(inputRef.id) !== undefined) throw Error(`_InputManager.regist: id already exists. id=${String(inputRef.id)}`);
     this.inputs.push(inputRef);
   }
 
   remove(id: symbol): void{
     const inputRef = this.find(id);
-    if(inputRef === undefined)
-      throw new Error(`_InputManager.remove: id does not exist. id=${String(id)}`);
-    
-    this.inputs = this.inputs.filter(item => item.id !== id);
+    if (inputRef === undefined) throw new Error(`_InputManager.remove: id does not exist. id=${String(id)}`);
+
+    this.inputs = this.inputs.filter((item) => item.id !== id);
     inputRef.dispose();
   }
 }
-export const InputManager = new _InputManager();
-if(process.env.NODE_ENV === "development")
-  (window as any).InputManager = InputManager;
+export const InputManager = new InputManagerImpl();
+if (process.env.NODE_ENV === 'development') (window as any).InputManager = InputManager;
 
 export interface ValidateError{
   message: string;
   allowSet: boolean;
 }
 
-export class InputRef{
+export class InputRef {
   readonly id: symbol;
+
   readonly name: string | undefined;
+
   readonly bindingPath: BindingPath;
+
   readonly defaultValue: any;
+
   readonly isEnable: boolean;
+
   readonly dependencePaths: BindingPath[];
+
   private _errors: ValidateError[] = [];
+
   private _value: any;
 
-  validate: () => void = () => {}; 
+  validate: () => void = () => {
+    // do nothing
+  };
+
   convert: (value: any) => any = (value) => value;
-  
-  constructor(id: symbol, name: string | undefined, bindingPath: BindingPath, defaultValue: any, isEnable: boolean, dependencePaths?: BindingPath[]){
+
+  constructor(id: symbol, name: string | undefined, bindingPath: BindingPath, defaultValue: any, isEnable: boolean, dependencePaths?: BindingPath[]) {
     this.id = id;
     this.name = name;
     this.bindingPath = bindingPath;
@@ -69,32 +79,34 @@ export class InputRef{
     this.isEnable = isEnable;
   }
 
-  getValue(){
+  getValue() {
     return this._value;
   }
-  setValue(value: any){
+
+  setValue(value: any) {
     const newValue = value === undefined ? this.defaultValue : value;
-    if(this._value !== newValue){
+    if (this._value !== newValue) {
       const oldValue = this._value;
       this._value = newValue;
       EventManager.inputChanged.call(this, {
         id: this.id,
-        oldValue: oldValue,
-        newValue: newValue,
+        oldValue,
+        newValue,
       });
     }
-    
   }
-  getError(){
+
+  getError() {
     return this._errors;
   }
-  setError(errors: ValidateError[]){
+
+  setError(errors: ValidateError[]) {
     const oldErrors = this._errors;
     this._errors = errors;
-    if(
+    if (
       (oldErrors.length === 0 && errors.length > 0)
-      ||  (oldErrors.length > 0 && errors.length === 0)
-    ){
+      || (oldErrors.length > 0 && errors.length === 0)
+    ) {
       EventManager.ErrorChanged.call(this, {
         sourceKey: this.bindingPath.$sourceKey,
         path: this.bindingPath.$path,
@@ -103,22 +115,26 @@ export class InputRef{
       });
     }
   }
-  
-  reset(){
+
+  reset() {
     const bindingSouce = SourceManager.find(this.bindingPath.$sourceKey);
     const initValue = bindingSouce === undefined ? undefined : bindingSouce.getValue(this.bindingPath.$path);
     const converted = this.convert(initValue);
     this.setValue(converted);
-    if(this._errors.length > 0){
+    if (this._errors.length > 0) {
       this.setError([]);
     }
   }
 
-  dispose(){
+  dispose() {
     this._errors = [];
     this._value = undefined;
-    this.validate = () => {};
-    this.convert = () => {};
+    this.validate = () => {
+      // do nothing
+    };
+    this.convert = () => {
+      // do nothing
+    };
   }
 }
 

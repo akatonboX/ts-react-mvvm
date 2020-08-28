@@ -1,24 +1,22 @@
-import { $path, Path, TypedPath } from "./path";
-import { Binding, $bind } from "./binding-receiver";
-
+import { $path, Path, TypedPath } from './path';
+import { Binding, $bind } from './binding-receiver';
 
 export type SourceKey = string | number | symbol;
-export const Invalid = Symbol("Invalid");
+export const Invalid = Symbol('Invalid');
 export type InvalidType = typeof Invalid;
 
-export const bindingPathSymbol = Symbol("BindingPath");
+export const bindingPathSymbol = Symbol('BindingPath');
 export interface BindingPath {
   readonly $sourceKey: SourceKey;
   readonly $path: Path;
   $contains(bindingPath: BindingPath): boolean;
   $equals(bindingPath: BindingPath): boolean;
   $asTypedBindingPath<T>(): TypedBindingPath<T>;
-  $type: Symbol;
+  $type: symbol;
 }
 
-
 export type TypedBindingPath<T> = (
-  T extends Array<infer Z>
+  T extends (infer Z)[]
   ? {
       [index: number]: TypedBindingPath<Z>;
       length: TypedBindingPath<number>;
@@ -35,45 +33,51 @@ export type TypedBindingPath<T> = (
 }
 & BindingPath;
 
-class TypedBindingPathImpl<T> implements BindingPath{
+class TypedBindingPathImpl<T> implements BindingPath {
   readonly $sourceKey: SourceKey;
+
   readonly $path: TypedPath<T>;
-  get $type(){return bindingPathSymbol;}
-  constructor(sourceKey: SourceKey, path?: TypedPath<T>){
+
+  get $type() { return bindingPathSymbol; }
+
+  constructor(sourceKey: SourceKey, path?: TypedPath<T>) {
     this.$sourceKey = sourceKey;
     this.$path = path === undefined ? $path<T>() : path;
   }
 
-  $contains(bindingPath: BindingPath): boolean{
+  $contains(bindingPath: BindingPath): boolean {
     return this.$sourceKey === bindingPath.$sourceKey && this.$path.$contains(bindingPath.$path);
   }
-  $equals(bindingPath: BindingPath): boolean{
+
+  $equals(bindingPath: BindingPath): boolean {
     return this.$sourceKey === bindingPath.$sourceKey && this.$path.$equals(bindingPath.$path);
   }
-  $asTypedBindingPath<T>(){
-    return this as any as TypedBindingPath<T>;
+
+  $asTypedBindingPath<T_TARGET>() {
+    return this as any as TypedBindingPath<T_TARGET>;
   }
-  $getChild<T>(propertyKey: PropertyKey){
-    return $bindingPath(this.$sourceKey, this.$path.$getChild(propertyKey).$asTypedPath<T>());
+
+  $getChild<T_CHILD>(propertyKey: PropertyKey) {
+    return $bindingPath(this.$sourceKey, this.$path.$getChild(propertyKey).$asTypedPath<T_CHILD>());
   }
-  $asBinding(defaultOrconverter?: ((prop: T | undefined) => any) | any){
+
+  $asBinding(defaultOrconverter?: ((prop: T | undefined) => any) | any) {
     return $bind(_bindingPath(this.$sourceKey, this.$path), defaultOrconverter);
   }
 }
 
-export function $bindingPath<T>(souceKey: SourceKey, path?: TypedPath<T>, defaultValue?: T): TypedBindingPath<T>{
+export function $bindingPath<T>(souceKey: SourceKey, path?: TypedPath<T>, defaultValue?: T): TypedBindingPath<T> {
   return _bindingPath<T>(souceKey, path === undefined ? $path<T>() : path);
 }
 
-function _bindingPath<T>(souceKey: SourceKey, path: TypedPath<T>): TypedBindingPath<T>{
+function _bindingPath<T>(souceKey: SourceKey, path: TypedPath<T>): TypedBindingPath<T> {
   return new Proxy(new TypedBindingPathImpl(souceKey, path) as any, {
-    get: function<T>(target: T, name: PropertyKey, receiver: any): any {
-      if(name in target){
+    get: (target: T, name: PropertyKey, receiver: any): any => {
+      if (name in target) {
         return Reflect.get(target as any, name, receiver);
       }
-      else{
-        return _bindingPath(souceKey, path.$getChild(name).$asTypedPath());
-      }
+
+      return _bindingPath(souceKey, path.$getChild(name).$asTypedPath());
     },
   }) as TypedBindingPath<T>;
 }
@@ -81,5 +85,3 @@ function _bindingPath<T>(souceKey: SourceKey, path: TypedPath<T>): TypedBindingP
 export function isBindingPath(item: any): item is BindingPath {
   return item.$type === bindingPathSymbol;
 }
-
-

@@ -1,3 +1,3 @@
-export function classes(...classes: string[]): string{
-  return classes.join(" ");
+export function classes(...classeNames: string[]): string {
+  return classeNames.join(' ');
 }
