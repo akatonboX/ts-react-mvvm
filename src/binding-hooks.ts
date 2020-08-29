@@ -192,6 +192,7 @@ export function useInput<T_VALUE, T_INPUT_VALUE>(
   };
 
   const inputRef = currentInputRef !== undefined ? currentInputRef : new InputRef(id, option.name, source, option.defaultValue, isEnable, dependencePaths);
+
   inputRef.validate = isEnable ? () => {
     const bindingSource2 = SourceManager.find(source.$sourceKey);
     if (bindingSource2 !== undefined) {
@@ -206,7 +207,9 @@ export function useInput<T_VALUE, T_INPUT_VALUE>(
     // do nothing
   };
   inputRef.convert = option.convert === undefined ? (value) => value : option.convert;
-
+ 
+  inputRef.isEnable = isEnable;
+  
   const inputChangedHandler = (sender: BindingSource, args: InputChangedEventArgs) => {
     if (id === args.id) {
       render();

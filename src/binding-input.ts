@@ -55,13 +55,13 @@ export class InputRef {
 
   readonly defaultValue: any;
 
-  readonly isEnable: boolean;
-
   readonly dependencePaths: BindingPath[];
 
   private _errors: ValidateError[] = [];
 
   private _value: any;
+
+  private _isEnable: boolean;
 
   validate: () => void = () => {
     // do nothing
@@ -76,13 +76,22 @@ export class InputRef {
     this._value = defaultValue;
     this.defaultValue = defaultValue;
     this.dependencePaths = dependencePaths === undefined ? [] : dependencePaths;
-    this.isEnable = isEnable;
+    this._isEnable = isEnable;
   }
 
   getValue() {
     return this._value;
   }
 
+  get isEnable(){
+    return this._isEnable;
+  }
+  set isEnable(value: boolean){
+    this._isEnable = value;
+    if(!this._isEnable){
+      this.setError([]);
+    }
+  }
   setValue(value: any) {
     const newValue = value === undefined ? this.defaultValue : value;
     if (this._value !== newValue) {
