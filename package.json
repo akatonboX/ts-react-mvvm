@@ -1,6 +1,6 @@
 {
   "name": "ts-react-mvvm",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "mvvm library for react/typescript",
   "main": "lib/index.js",
   "license": "MIT",
